@@ -75,4 +75,8 @@ class MULTIPLAYERSESSIONS_API UMultiplayerSessionsSubsystem : public UGameInstan
 		FOnStartSessionCompleteDelegate StartSessionCompleteDelegate;
 		FDelegateHandle StartSessionCompleteDelegateHandle;
 
+
+		bool bCreateSessionOnDestroy{ false };
+		int32 LastNumPublicConnections;
+		FString LastMatchType;
 };
