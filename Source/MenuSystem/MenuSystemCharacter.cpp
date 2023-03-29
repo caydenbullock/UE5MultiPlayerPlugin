@@ -60,8 +60,9 @@ AMenuSystemCharacter::AMenuSystemCharacter():
 	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
 	if (OnlineSubsystem)
 	{
-		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
 		
+		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
+		/*
 		if (GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(
@@ -71,6 +72,7 @@ AMenuSystemCharacter::AMenuSystemCharacter():
 				FString::Printf(TEXT("Found subsystem %s"), *OnlineSubsystem->GetSubsystemName().ToString())
 			);
 		}
+		*/
 	}
 }
 
@@ -124,8 +126,7 @@ void AMenuSystemCharacter::CreateGameSession()
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
 	SessionSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-
-	//SessionSettings->bUseLobbiesIfAvailable = true;
+	SessionSettings->bUseLobbiesIfAvailable = true;
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
 
@@ -138,7 +139,15 @@ void AMenuSystemCharacter::JoinGameSession()
 	{
 		return;
 	}
-
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Blue,
+			FString::Printf(TEXT("OnlineSessionInterface.IsValid !"))
+		);
+	}
 	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
@@ -167,7 +176,7 @@ void AMenuSystemCharacter::OnCreateSessionComplete(FName SessionName, bool bWasS
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			World->ServerTravel(FString("/Game/Content/ThirdPerson/Maps/Lobby?listen"));
+			World->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
 		}
 	}
 	else
@@ -189,6 +198,18 @@ void AMenuSystemCharacter::OnFindSessionsComplete(bool bWasSuccessful)
 	if (!OnlineSessionInterface.IsValid())
 	{
 		return;
+	} 
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Red,
+				FString::Printf(TEXT("online sesh interface not valid in find sessions complete"))
+			);
+		}
 	}
 
 	for (auto Result : SessionSearch->SearchResults)
@@ -233,6 +254,15 @@ void AMenuSystemCharacter::OnJoinSessionComplete(FName SessionName, EOnJoinSessi
 	if (!OnlineSessionInterface.IsValid())
 	{
 		return;
+	}
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			15.f,
+			FColor::Blue,
+			FString::Printf(TEXT("OnJoinSessionComplete"))
+		);
 	}
 	FString Address;
 	if (OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
